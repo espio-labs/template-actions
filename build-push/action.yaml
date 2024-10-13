@@ -1,0 +1,38 @@
+name: 'Build & Push Action'
+description: 'Builds and pushes a Docker image'
+inputs:
+  projectName:
+    description: 'Project Name'
+    required: true
+  imageName:
+    description: 'Image Name'
+    required: true
+  imageVersion:
+    description: 'Image Version'
+    required: true
+  dockerfilePath:
+    description: 'Path to Dockerfile'
+    required: false
+    default: './Dockerfile'
+  registryUrl:
+    description: 'Registry URL'
+    required: true
+  registryUsername:
+    description: 'Registry Username'
+    required: true
+  registryPassword:
+    description: 'Registry Password'
+    required: true
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Docker login
+      run: docker login ${{ inputs.registryUrl }} -u ${{ inputs.registryUsername }} -p ${{ inputs.registryPassword }}
+      shell: bash
+
+    - name: Build and push Docker image
+      run: |
+        docker build -t ${{ inputs.registryUrl }}/${{ inputs.projectName }}/${{ inputs.imageName }}:${{ inputs.imageVersion }} -f ${{ inputs.dockerfilePath }} .
+        docker push ${{ inputs.registryUrl }}/${{ inputs.projectName }}/${{ inputs.imageName }}:${{ inputs.imageVersion }}
+      shell: bash
