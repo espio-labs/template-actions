@@ -17,18 +17,25 @@ inputs:
   registryUrl:
     description: 'Registry URL'
     required: true
-  registryUsername:
-    description: 'Registry Username'
+  awsAccessKeyId:
+    description: 'AWS Access Key Id'
     required: true
-  registryPassword:
-    description: 'Registry Password'
+  awsSecretAccessKey:
+    description: 'AWS Secret Access Key'
     required: true
 
 runs:
   using: 'composite'
   steps:
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v1
+      with:
+        aws-access-key-id: ${{ inputs.awsAccessKeyId }}
+        aws-secret-access-key: ${{ inputs.awsSecretAccessKey }}
+        aws-region: ${{ inputs.awsRegion }}
     - name: Docker login
-      run: docker login ${{ inputs.registryUrl }} -u ${{ inputs.registryUsername }} -p ${{ inputs.registryPassword }}
+      run: |
+        aws ecr get-login-password --region ${{ inputs.awsRegion }} | docker login --username AWS --password-stdin ${{ inputs.registryUrl }}
       shell: bash
 
     - name: Build and push Docker image
