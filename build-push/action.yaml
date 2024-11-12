@@ -36,6 +36,7 @@ runs:
         aws-access-key-id: ${{ inputs.awsAccessKeyId }}
         aws-secret-access-key: ${{ inputs.awsSecretAccessKey }}
         aws-region: ${{ inputs.awsRegion }}
+        
     - name: Docker login
       run: |
         aws ecr get-login-password --region ${{ inputs.awsRegion }} | docker login --username AWS --password-stdin ${{ inputs.registryUrl }}
