@@ -20,22 +20,32 @@ inputs:
   registryUrl:
     description: 'Registry URL'
     required: true
-  registryUsername:
-    description: 'Registry Username'
+  awsAccessKeyId:
+    description: 'AWS Access Key Id'
     required: true
-  registryPassword:
-    description: 'Registry Password'
+  awsSecretAccessKey:
+    description: 'AWS Secret Access Key'
+    required: true
+  awsRegion:
+    description: 'AWS Region'
     required: true
   kubeConfig:
     description: 'Kubernetes configuration secret'
     required: true
   rootappChartVersion:
-    description: 'Kubernetes configuration secret'
+    description: 'Rootapp Chart Version'
     default: '1.0.0'
 
 runs:
   using: 'composite'
   steps:
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v1
+      with:
+        aws-access-key-id: ${{ inputs.awsAccessKeyId }}
+        aws-secret-access-key: ${{ inputs.awsSecretAccessKey }}
+        aws-region: ${{ inputs.awsRegion }}
+
     - name: Set up Helm
       uses: azure/setup-helm@v1
       with:
@@ -43,7 +53,8 @@ runs:
 
     - name: Template values file
       run: |
-        cat <<EOF >> ${{ github.workspace }}/${{ inputs.environment }}/rootapp.yaml
+        mkdir -p ${{ github.workspace }}/${{ inputs.environment }}
+        cat <<EOF > ${{ github.workspace }}/${{ inputs.environment }}/rootapp.yaml
         
         repositories:
           ${{ inputs.project }}:
@@ -60,14 +71,12 @@ runs:
       run: |
         echo "${{ inputs.kubeConfig }}" > kubeconfig.yml
         helm upgrade ${{ inputs.project }}-rootapp oci://${{ inputs.registryUrl }}/devtools/argo-rootapp \
-        --install \
-        --kubeconfig kubeconfig.yml \
-        --version ${{ inputs.rootappChartVersion }} \
-        --values ${{ github.workspace }}/${{ inputs.environment }}/rootapp.yaml \
-        --namespace argocd \
-        --username ${{ inputs.registryUsername }} \
-        --password ${{ inputs.registryPassword }} \
-        --insecure-skip-tls-verify
+          --install \
+          --kubeconfig kubeconfig.yml \
+          --version ${{ inputs.rootappChartVersion }} \
+          --values ${{ github.workspace }}/${{ inputs.environment }}/rootapp.yaml \
+          --namespace argocd \
+          --insecure-skip-tls-verify
       shell: bash
       env:
         HELM_MAX_HISTORY: '5'
