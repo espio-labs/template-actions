@@ -32,11 +32,12 @@ runs:
       with:
         aws-access-key-id: ${{ inputs.awsAccessKeyId }}
         aws-secret-access-key: ${{ inputs.awsSecretAccessKey }}
-        aws-region: ${{ inputs.awsRegion }}
+        # aws-region: ${{ inputs.awsRegion }}
     - name: Docker login
       run: |
-        aws ecr get-login-password --region ${{ inputs.awsRegion }} | docker login --username AWS --password-stdin ${{ inputs.registryUrl }}
+        aws ecr get-login-password | docker login --username AWS --password-stdin ${{ inputs.registryUrl }}
       shell: bash
+      # --region ${{ inputs.awsRegion }} 
 
     - name: Build and push Docker image
       run: |
