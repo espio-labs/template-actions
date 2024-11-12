@@ -39,7 +39,7 @@ runs:
         
     - name: Docker login
       run: |
-        aws ecr get-login-password --region ${{ inputs.awsRegion }} | docker login --username AWS --password-stdin ${{ inputs.registryUrl }}
+        aws ecr-public get-login-password | docker login --username AWS --password-stdin ${{ inputs.registryUrl }}
       shell: bash
 
     - name: Build and push Docker image
