@@ -53,8 +53,7 @@ runs:
 
     - name: Template values file
       run: |
-        mkdir -p ${{ github.workspace }}/${{ inputs.environment }}
-        cat <<EOF > ${{ github.workspace }}/${{ inputs.environment }}/rootapp.yaml
+        cat <<EOF >> ${{ github.workspace }}/${{ inputs.environment }}/rootapp.yaml
         
         repositories:
           ${{ inputs.project }}:
@@ -76,6 +75,8 @@ runs:
           --version ${{ inputs.rootappChartVersion }} \
           --values ${{ github.workspace }}/${{ inputs.environment }}/rootapp.yaml \
           --namespace argocd \
+          --username ${{ inputs.registryUsername }} \
+          --password ${{ inputs.registryPassword }} \
           --insecure-skip-tls-verify
       shell: bash
       env:
